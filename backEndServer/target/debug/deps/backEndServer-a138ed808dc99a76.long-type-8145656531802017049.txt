@@ -1,1 +1,0 @@
-fn(Extension<AppState>, tower_sessions::Session, Json<webauthn_rs::prelude::RegisterPublicKeyCredential>) -> impl futures::Future<Output = Result<impl IntoResponse, error::WebauthnError>> {finish_register}
