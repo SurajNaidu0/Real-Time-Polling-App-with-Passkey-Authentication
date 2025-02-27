@@ -14,9 +14,16 @@ pub enum WebauthnError {
     UserNotFound,
     #[error("User Has No Credentials")]
     UserHasNoCredentials,
+    #[error("User Already Exists")]
+    UserExists,
+    #[error("Invalid Credential")]
+    InvalidCredential,
+    #[error("Database Error")]
+    DatabaseError,
     #[error("Deserialising Session failed: {0}")]
     InvalidSessionState(#[from] tower_sessions::session::Error),
 }
+
 impl IntoResponse for WebauthnError {
     fn into_response(self) -> Response {
         let body = match self {
@@ -25,6 +32,9 @@ impl IntoResponse for WebauthnError {
             WebauthnError::Unknown => "Unknown Error",
             WebauthnError::UserHasNoCredentials => "User Has No Credentials",
             WebauthnError::InvalidSessionState(_) => "Deserialising Session failed",
+            WebauthnError::UserExists => "User Already Exists",
+            WebauthnError::InvalidCredential => "Invalid Credential",
+            WebauthnError::DatabaseError => "Database Error",
         };
 
         // its often easiest to implement `IntoResponse` by calling other implementations

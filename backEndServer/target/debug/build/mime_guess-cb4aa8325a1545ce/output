@@ -1,0 +1,1 @@
+cargo:rustc-env=MIME_TYPES_GENERATED_PATH=/Users/suraj/RustroverProjects/weeK5Catalog/backEndServer/target/debug/build/mime_guess-cb4aa8325a1545ce/out/mime_types_generated.rs

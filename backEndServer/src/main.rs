@@ -6,8 +6,8 @@ use tower_sessions::{
     Expiry, MemoryStore, SessionManagerLayer,
 };
 mod error;
-use crate::auth::{finish_authentication, finish_register, start_authentication, start_register};
 use crate::startup::AppState;
+use crate::auth::{start_register, finish_register, start_authentication, finish_authentication};
 
 #[macro_use]
 extern crate tracing;
@@ -25,11 +25,11 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     // Create the app
-    let app_state = AppState::new();
+    let app_state = AppState::new().await;
 
     let session_store = MemoryStore::default();
 
-    // build our application with a route
+    //build our application with a route
     let app = Router::new()
         .route("/register_start/:username", post(start_register))
         .route("/register_finish", post(finish_register))
@@ -49,8 +49,6 @@ async fn main() {
         .merge(app)
         .nest_service("/", tower_http::services::ServeDir::new("../frontEnd/js"));
 
-    // run our app with hyper
-    // `axum::Server` is a re-export of `hyper::Server`
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     info!("listening on {addr}");
 
@@ -64,4 +62,3 @@ async fn main() {
 async fn handler_404() -> impl IntoResponse {
     (StatusCode::NOT_FOUND, "nothing to see here")
 }
-
