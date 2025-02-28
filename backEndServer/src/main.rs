@@ -8,12 +8,13 @@ use tower_sessions::{
 mod error;
 use crate::startup::AppState;
 use crate::auth::{start_register, finish_register, start_authentication, finish_authentication};
-
+use crate::polls::create_poll;
 #[macro_use]
 extern crate tracing;
 
 mod auth;
 mod startup;
+mod polls;
 
 
 #[tokio::main]
@@ -35,6 +36,7 @@ async fn main() {
         .route("/register_finish", post(finish_register))
         .route("/login_start/:username", post(start_authentication))
         .route("/login_finish", post(finish_authentication))
+        .route("/api/polls", post(create_poll))
         .layer(Extension(app_state))
         .layer(
             SessionManagerLayer::new(session_store)

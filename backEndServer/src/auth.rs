@@ -24,6 +24,20 @@ pub struct User {
     pub uuid: Uuid,
 }
 
+pub async fn is_authenticated(session: &Session) -> Result<mongodb::bson::oid::ObjectId, WebauthnError> {
+    let user_id = session.get::<mongodb::bson::oid::ObjectId>("user_id").await
+        .map_err(|e| {
+            error!("Session error: {:?}", e);
+            WebauthnError::CorruptSession
+        })?
+        .ok_or_else(|| {
+            info!("User not authenticated");
+            WebauthnError::Unauthenticated
+        })?;
+
+    Ok(user_id)
+}
+
 // Custom serde module to convert Uuid to Binary and back
 mod uuid_binary_format {
     use mongodb::bson::Binary;
@@ -279,6 +293,12 @@ pub async fn finish_authentication(
                         error!("Failed to update user credential: {:?}", e);
                         WebauthnError::DatabaseError
                     })?;
+
+                // Store user ID in session to mark them as authenticated
+                session.insert("user_id", id).await.map_err(|e| {
+                    error!("Failed to store user ID in session: {:?}", e);
+                    WebauthnError::CorruptSession
+                })?;
 
                 info!("Authentication successful for user with UUID: {:?}", user_uuid);
                 Ok(StatusCode::OK)
